@@ -33,11 +33,10 @@ class ProductApiTest extends TestCase
 
     public function testUnauthUserCanNotUpdateProduct()
     {
-        $user = User::factory()->create(['role' => 1]);
+        $user = User::factory()->create();
         $product = Product::factory()->create(['added_by' => $user->id]);
 
         $response = $this->patchJson('/api/products/' . $product->id, []);
-
         $response->assertJson([
             "message" => "Unauthenticated."
         ]);
@@ -45,7 +44,7 @@ class ProductApiTest extends TestCase
 
     public function testUnauthUserCanNotDeleteProduct()
     {
-        $user = User::factory()->create(['role' => 1]);
+        $user = User::factory()->create();
         $product = Product::factory()->create(['added_by' => $user->id]);
 
         $response = $this->deleteJson('/api/products/' . $product->id);
@@ -56,10 +55,10 @@ class ProductApiTest extends TestCase
 
     public function testAuthSellerUserCanCreateProduct()
     {
-        $user = User::factory()->create(['role' => 1]);
-        Auth::login($user);
+        $sellerUser = User::factory()->create(['role' => 1]);
+        Auth::login($sellerUser);
         $response = $this->postJson('/api/products', [
-            'added_by' => $user->id,
+            'added_by' => $sellerUser->id,
             'name' => 'product',
             'amount_avilable' => 5,
             'cost' => 5,
@@ -69,9 +68,9 @@ class ProductApiTest extends TestCase
 
     public function testAuthSellerUserCanUpdateHisProduct()
     {
-        $user = User::factory()->create(['role' => 1]);
-        $product = Product::factory()->create(['added_by' => $user->id]);
-        Auth::login($user);
+        $sellerUser = User::factory()->create(['role' => 1]);
+        $product = Product::factory()->create(['added_by' => $sellerUser->id]);
+        Auth::login($sellerUser);
         $response = $this->patchJson('/api/products/' . $product->id, [
             'name' => 'product',
             'amount_avilable' => 6,
@@ -82,20 +81,20 @@ class ProductApiTest extends TestCase
 
     public function testAuthSellerUserCanDeleteHisProduct()
     {
-        $user = User::factory()->create(['role' => 1]);
-        $product = Product::factory()->create(['added_by' => $user->id]);
-        Auth::login($user);
+        $sellerUser = User::factory()->create(['role' => 1]);
+        $product = Product::factory()->create(['added_by' => $sellerUser->id]);
+        Auth::login($sellerUser);
         $response = $this->deleteJson('/api/products/' . $product->id);
-        $response->assertStatus(200);
+        $response->assertOk();
     }
     
     public function testAuthSellerUserCanNotUpdateOtherThanHisProducts()
     {
-        $user1 = User::factory()->create(['role' => 1]);
-        $user2 = User::factory()->create(['role' => 1]);
-        $product = Product::factory()->create(['added_by' => $user2->id]);
+        $sellerForAuth = User::factory()->create(['role' => 1]);
+        $sellerForAddProduct = User::factory()->create(['role' => 1]);
+        $product = Product::factory()->create(['added_by' => $sellerForAddProduct->id]);
 
-        Auth::login($user1);
+        Auth::login($sellerForAuth);
         $response = $this->patchJson('/api/products/' . $product->id, [
             'name' => 'product',
             'amount_avilable' => 6,
@@ -111,11 +110,11 @@ class ProductApiTest extends TestCase
 
     public function testAuthSellerUserCanNotDeleteOtherThanHisProducts()
     {
-        $user1 = User::factory()->create(['role' => 1]);
-        $user2 = User::factory()->create(['role' => 1]);
-        $product = Product::factory()->create(['added_by' => $user2->id]);
+        $sellerForAuth = User::factory()->create(['role' => 1]);
+        $sellerForAddProduct = User::factory()->create(['role' => 1]);
+        $product = Product::factory()->create(['added_by' => $sellerForAddProduct->id]);
 
-        Auth::login($user1);
+        Auth::login($sellerForAuth);
         $response = $this->deleteJson('/api/products/' . $product->id);
         $response->assertJson([
             'status' => 'Error',
@@ -124,13 +123,10 @@ class ProductApiTest extends TestCase
         ]);
     }
 
-   
-
     public function testAuthBuyerUserCanNotCreateProduct()
     {
-
-        $user = User::factory()->create(['role' => 0]);
-        Auth::login($user);
+        $buyerUser = User::factory()->create(['role' => 0]);
+        Auth::login($buyerUser);
         $response = $this->postJson('/api/products', []);
         $response->assertJson([
             "status" => "Error",
@@ -141,9 +137,9 @@ class ProductApiTest extends TestCase
 
     public function testAuthBuyerUserCanNotUpdateProduct()
     {
-        $user = User::factory()->create(['role' => 0]);
-        $product = Product::factory()->create(['added_by' => $user->id]);
-        Auth::login($user);
+        $buyerUser = User::factory()->create(['role' => 0]);
+        $product = Product::factory()->create(['added_by' => $buyerUser->id]);
+        Auth::login($buyerUser);
         $response = $this->patchJson('/api/products/' . $product->id, []);
         $response->assertJson([
             "status" => "Error",
@@ -154,9 +150,9 @@ class ProductApiTest extends TestCase
 
     public function testAuthBuyerUserCanNotDeleteProduct()
     {
-        $user = User::factory()->create(['role' => 0]);
-        $product = Product::factory()->create(['added_by' => $user->id]);
-        Auth::login($user);
+        $buyerUser = User::factory()->create(['role' => 0]);
+        $product = Product::factory()->create(['added_by' => $buyerUser->id]);
+        Auth::login($buyerUser);
         $response = $this->deleteJson('/api/products/' . $product->id);
         $response->assertJson([
             "status" => "Error",

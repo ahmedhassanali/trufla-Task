@@ -14,28 +14,29 @@ class UserTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function testRegister(){
-       $response = $this->postJson('/api/users',[
-        'name' => 'ahmed',
-        'user_name' => 'ahmed_h',
-        'role'=> 0,
-        'password' => Hash::make('123456789'),
-        'remember_token' => Str::random(10),
-       ]);
-
+    public function testRegister()
+    {
+        $response = $this->postJson('/api/users', [
+            'name' => 'ahmed',
+            'user_name' => 'ahmed_h',
+            'role' => 0,
+            'password' => Hash::make('123456789'),
+            'remember_token' => Str::random(10),
+        ]);
         $response->assertOk();
     }
 
-    public function testLogin(){
+    public function testLogin()
+    {
         User::factory()->create([
             'name' => 'buyer',
             'user_name' => 'buyer',
-            'role'=> 0,
+            'role' => 0,
             'password' => Hash::make('123456789'),
             'remember_token' => Str::random(10),
         ]);
 
-        $response = $this->post('/api/login',[
+        $response = $this->post('/api/login', [
             'user_name' => 'buyer',
             'password' => '123456789',
         ]);
@@ -43,7 +44,8 @@ class UserTest extends TestCase
         $response->assertOk();
     }
 
-    public function testLogout(){
+    public function testLogout()
+    {
 
         $user = User::factory()->create();
         Auth::login($user);
@@ -56,7 +58,8 @@ class UserTest extends TestCase
         ]);
     }
 
-    public function testUnauthUserCanNotUpdateUser(){
+    public function testUnauthUserCanNotUpdateUser()
+    {
 
         $user = User::factory()->create();
         $response = $this->patchJson('/api/users/' . $user->id, []);
@@ -65,36 +68,33 @@ class UserTest extends TestCase
         ]);
     }
 
-    public function testUnauthUserCanNotDeleteUser(){
+    public function testUnauthUserCanNotDeleteUser()
+    {
         $user = User::factory()->create();
         $response = $this->deleteJson('/api/users/' . $user->id);
         $response->assertJson([
             "message" => "Unauthenticated."
-        ]); 
+        ]);
     }
 
-    public function testAuthUserCanUpdateUserData(){
+    public function testAuthUserCanUpdateUserData()
+    {
         $user = User::factory()->create();
         Auth::login($user);
         $response = $this->patchJson('/api/users/' . $user->id, [
             'name' => 'Name',
             'user_name' => 'userName',
-            'role'=> 0,
+            'role' => 0,
             'password' => Hash::make('123456789'),
         ]);
         $response->assertOk();
     }
 
-    public function testAuthUserCanDeleteUser(){
+    public function testAuthUserCanDeleteUser()
+    {
         $user = User::factory()->create();
         Auth::login($user);
         $response = $this->deleteJson('/api/users/' . $user->id);
-        $response->assertStatus(200); 
+        $response->assertOk();
     }
-
- 
-
-    
-
-    
 }

@@ -36,12 +36,8 @@ class OrderTest extends TestCase
         $userSeller = User::factory()->create(['role' => 1]);
         Auth::login($userSeller);
 
-        $product = Product::factory()->create([
-            'added_by' => $userSeller->id,
-            'name' => 'product',
-            'amount_avilable' => 5,
-            'cost' => 5,
-        ]);
+        $product1 = Product::factory()->create(['added_by'=>$userSeller->id]);
+        $product2 = Product::factory()->create(['added_by'=>$userSeller->id]);
 
         $userBuyer = User::factory()->create(['role'=> 0]);
         Auth::login($userBuyer);
@@ -49,8 +45,8 @@ class OrderTest extends TestCase
         $response = $this->postJson('/api/orders', [
             "customer_id" => $userBuyer->id,
             "products" => [
-                ["product_id"=>$product->id,"quantity"=>5],
-                ["product_id"=>$product->id,"quantity"=>6]
+                ["product_id"=>$product1->id,"quantity"=>5],
+                ["product_id"=>$product2->id,"quantity"=>6]
             ]
         ]);
 
@@ -58,8 +54,6 @@ class OrderTest extends TestCase
     }
 
     public function testAuthSellerUserCanNotCreateOrder(){
-
-        $this->withExceptionHandling();
 
         $userSeller = User::factory()->create(['role' => 1]);
         Auth::login($userSeller);

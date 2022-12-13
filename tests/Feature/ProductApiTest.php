@@ -13,8 +13,9 @@ use Illuminate\Support\Str;
 class ProductApiTest extends TestCase
 {
     use RefreshDatabase;
-    
-    public function test_ProductesApiReturnsJson(){   
+
+    public function testProductesApiReturnsJson()
+    {
         $user = User::factory()->create();
         Auth::login($user);
         $response = $this->getJson('/api/products');
@@ -22,141 +23,145 @@ class ProductApiTest extends TestCase
         $response->assertHeader('Content-Type', 'application/json');
     }
 
-    public function test_unAuthUserCanNotCreateProduct(){
+    public function testUnauthUserCanNotCreateProduct()
+    {
         $response = $this->postJson('/api/products');
         $response->assertJson([
             "message" => "Unauthenticated."
         ]);
     }
 
-    public function test_AuthSellerUserCanCreateProduct(){
+    public function testUnauthUserCanNotUpdateProduct()
+    {
+        $user = User::factory()->create(['role' => 1]);
+        $product = Product::factory()->create(['added_by' => $user->id]);
 
-        $user = User::factory()->create(['role'=> 1]);
+        $response = $this->patchJson('/api/products/' . $product->id, []);
+
+        $response->assertJson([
+            "message" => "Unauthenticated."
+        ]);
+    }
+
+    public function testUnauthUserCanNotDeleteProduct()
+    {
+        $user = User::factory()->create(['role' => 1]);
+        $product = Product::factory()->create(['added_by' => $user->id]);
+
+        $response = $this->deleteJson('/api/products/' . $product->id);
+        $response->assertJson([
+            "message" => "Unauthenticated."
+        ]);
+    }
+
+    public function testAuthSellerUserCanCreateProduct()
+    {
+        $user = User::factory()->create(['role' => 1]);
         Auth::login($user);
-        $response = $this->postJson('/api/products',[
+        $response = $this->postJson('/api/products', [
             'added_by' => $user->id,
             'name' => 'product',
             'amount_avilable' => 5,
             'cost' => 5,
         ]);
-
-        $response->assertStatus(200);
-
+        $response->assertOk();
     }
 
-    // public function test_unAuthUserCanNotUpdateProduct(){
-    //     $user = User::factory()->create(['role'=> 1]);
-    //     $product = Product::factory()->create(['added_by'=>$user->id]);
-
-    //     $response = $this->patchJson('/api/products'.$product->id,[
-    //         'name' => 'product',
-    //         'amount_avilable' => 6,
-    //         'cost' => 5,
-    //     ]);
-
-    //     $response->assertJson([
-            
-    //     ]);
-    // }
-
-    public function test_AuthSellerUserCanUpdateHisProduct(){
-        $user = User::factory()->create(['role'=> 1]);
-        $product = Product::factory()->create(['added_by'=>$user->id]);
+    public function testAuthSellerUserCanUpdateHisProduct()
+    {
+        $user = User::factory()->create(['role' => 1]);
+        $product = Product::factory()->create(['added_by' => $user->id]);
         Auth::login($user);
-        $response = $this->patchJson('/api/products/'.$product->id,[
+        $response = $this->patchJson('/api/products/' . $product->id, [
+            'name' => 'product',
+            'amount_avilable' => 6,
+            'cost' => 5,
+        ]);
+        $response->assertOk();
+    }
+
+    public function testAuthSellerUserCanDeleteHisProduct()
+    {
+        $user = User::factory()->create(['role' => 1]);
+        $product = Product::factory()->create(['added_by' => $user->id]);
+        Auth::login($user);
+        $response = $this->deleteJson('/api/products/' . $product->id);
+        $response->assertStatus(200);
+    }
+    
+    public function testAuthSellerUserCanNotUpdateOtherThanHisProducts()
+    {
+        $user1 = User::factory()->create(['role' => 1]);
+        $user2 = User::factory()->create(['role' => 1]);
+        $product = Product::factory()->create(['added_by' => $user2->id]);
+
+        Auth::login($user1);
+        $response = $this->patchJson('/api/products/' . $product->id, [
             'name' => 'product',
             'amount_avilable' => 6,
             'cost' => 5,
         ]);
 
-        $response->assertStatus(200);
-
-    }
-
-    // public function test_AuthSellerUserCanNotUpdateOtherThanHisProducts(){
-    //     $user1 = User::factory()->create(['role'=> 1]);
-    //     $user2 = User::factory()->create(['role'=> 1]);
-    //     $product = Product::factory()->create(['added_by'=>$user2->id]);
-
-    //     Auth::login($user1);
-    //     $response = $this->patchJson('/api/products/'.$product->id,[
-    //         'name' => 'product',
-    //         'amount_avilable' => 6,
-    //         'cost' => 5,
-    //     ]);
-
-    //     $response->assertStatus(200);
-
-    // }
-
-    // public function test_AuthSellerUserCanNotDeleteOtherThanHisProducts(){
-    //     $user1 = User::factory()->create(['role'=> 1]);
-    //     $user2 = User::factory()->create(['role'=> 1]);
-    //     $product = Product::factory()->create(['added_by'=>$user2->id]);
-
-    //     Auth::login($user1);
-    //     $response = $this->deleteJson('/api/products/'.$product->id);
-
-
-    //     $response->assertStatus(200);
-
-    // }
-
-    // public function test_unAuthUserCanNotDeleteProduct(){
-    //     $user = User::factory()->create(['role'=> 1]);
-    //     $product = Product::factory()->create(['added_by'=>$user->id]);
-
-    //     $response = $this->deleteJson('/api/products'.$product->id);
-    //     $response->assertJson([
-    //         "message" => "Unauthenticated."
-    //     ]);
-    // }
-
-    public function test_AuthSellerUserCanDeleteProduct(){
-        $user = User::factory()->create(['role'=> 1]);
-        $product = Product::factory()->create(['added_by'=>$user->id]);
-        Auth::login($user);
-        $response = $this->deleteJson('/api/products/'.$product->id);
-        $response->assertStatus(200);
-    }
-
-    public function test_AuthBuyerUserCanNotCreateProduct(){
-
-        $user = User::factory()->create(['role'=> 0]);
-        Auth::login($user);
-        $response = $this->postJson('/api/products',[
-            'added_by' => $user->id,
-            'name' => 'product',
-            'amount_avilable' => 5,
-            'cost' => 5,
-        ]);
-
         $response->assertJson([
-            "You don't have permission to access this route"
+            'status' => 'Error',
+            'message' => 'You don’t have permission to access this product',
+            'data' => NULL,
         ]);
     }
 
-    // public function test_AuthBuyerUserCanNotUpdateProduct(){
-    //     $user = User::factory()->create(['role'=> 0]);
-    //     $product = Product::factory()->create(['added_by'=>$user->id]);
-    //     Auth::login($user);
-    //     $response = $this->patchJson('/api/products'.$product->id,[
-    //         'name' => 'product',
-    //         'amount_avilable' => 6,
-    //         'cost' => 5,
-    //     ]);
-    //     $response->assertJson([
-    //         "You don't have permission to access this route"
-    //     ]);
-    // }
+    public function testAuthSellerUserCanNotDeleteOtherThanHisProducts()
+    {
+        $user1 = User::factory()->create(['role' => 1]);
+        $user2 = User::factory()->create(['role' => 1]);
+        $product = Product::factory()->create(['added_by' => $user2->id]);
 
-    public function test_AuthBuyerUserCanNotDeleteProduct(){
-        $user = User::factory()->create(['role'=> 0]);
-        $product = Product::factory()->create(['added_by'=>$user->id]);
-        Auth::login($user);
-        $response = $this->deleteJson('/api/products/'.$product->id);
+        Auth::login($user1);
+        $response = $this->deleteJson('/api/products/' . $product->id);
         $response->assertJson([
-            "You don't have permission to access this route"
+            'status' => 'Error',
+            'message' => 'You don’t have permission to access this product',
+            'data' => NULL,
+        ]);
+    }
+
+   
+
+    public function testAuthBuyerUserCanNotCreateProduct()
+    {
+
+        $user = User::factory()->create(['role' => 0]);
+        Auth::login($user);
+        $response = $this->postJson('/api/products', []);
+        $response->assertJson([
+            "status" => "Error",
+            "message" => "You don't have permission to access this route",
+            "data" => null
+        ]);
+    }
+
+    public function testAuthBuyerUserCanNotUpdateProduct()
+    {
+        $user = User::factory()->create(['role' => 0]);
+        $product = Product::factory()->create(['added_by' => $user->id]);
+        Auth::login($user);
+        $response = $this->patchJson('/api/products/' . $product->id, []);
+        $response->assertJson([
+            "status" => "Error",
+            "message" => "You don't have permission to access this route",
+            "data" => null
+        ]);
+    }
+
+    public function testAuthBuyerUserCanNotDeleteProduct()
+    {
+        $user = User::factory()->create(['role' => 0]);
+        $product = Product::factory()->create(['added_by' => $user->id]);
+        Auth::login($user);
+        $response = $this->deleteJson('/api/products/' . $product->id);
+        $response->assertJson([
+            "status" => "Error",
+            "message" => "You don't have permission to access this route",
+            "data" => null
         ]);
     }
 }

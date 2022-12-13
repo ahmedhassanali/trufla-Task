@@ -28,7 +28,7 @@ class OrderService{
         $data['customer_id'] = auth()->user()->id;
         $order = $this->orderRepository->create($data);
         $order->products()->attach($data['products']);
-        return $order();
+        return $order;
     }
 
     public function update(array $data ,int $id)

@@ -18,6 +18,7 @@ class OrderController extends Controller
     {
         
     }
+
     public function index()
     {
         try {
@@ -27,6 +28,7 @@ class OrderController extends Controller
             return $this->errorResponse($exception->getMessage(), $exception->getCode());
         }
     }
+
     public function store(OrderStoreRequest $request)
     {
         try {
@@ -36,6 +38,7 @@ class OrderController extends Controller
             return $this->errorResponse($exception->getMessage(), $exception->getCode());
         }
     }
+
     public function update(OrderUpdateRequest $request, Order $order)
     {
         try {
@@ -45,6 +48,7 @@ class OrderController extends Controller
             return $this->errorResponse($exception->getMessage(), $exception->getCode());
         }
     }
+
     public function show(Order $order)
     {
         try {
@@ -54,6 +58,7 @@ class OrderController extends Controller
             return $this->errorResponse($exception->getMessage(), $exception->getCode());
         }
     }
+    
     public function destroy(Order $order)
     {
         try {

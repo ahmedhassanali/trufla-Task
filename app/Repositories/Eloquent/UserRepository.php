@@ -16,7 +16,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface {
         $this->model = $model;    
     }
 
-    public function createUser(array $data):Model
+    public function createUser(array $data): ?Model
     {
         $user = $this->model->create($data);
         $token = Auth::login($user);

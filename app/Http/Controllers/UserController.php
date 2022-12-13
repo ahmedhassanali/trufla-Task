@@ -25,6 +25,7 @@ class UserController extends Controller
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
     }
+
     public function store(UserStoreRequest $request)
     {
         try {
@@ -34,6 +35,7 @@ class UserController extends Controller
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
     }
+    
     public function update(UserUpdateRequest $request, User $user)
     {
         try {
@@ -43,6 +45,7 @@ class UserController extends Controller
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
     }
+
     public function show(User $user)
     {
         try {
@@ -52,6 +55,7 @@ class UserController extends Controller
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
     }
+
     public function destroy(User $user)
     {
         try {

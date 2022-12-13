@@ -5,17 +5,28 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 use Illuminate\Support\Str;
 
 class UserTest extends TestCase
 {
- 
     use RefreshDatabase;
 
-    public function test_Login()
-    {
+    public function testRegister(){
+       $response = $this->postJson('/api/users',[
+        'name' => 'ahmed',
+        'user_name' => 'ahmed_h',
+        'role'=> 0,
+        'password' => Hash::make('123456789'),
+        'remember_token' => Str::random(10),
+       ]);
+
+        $response->assertOk();
+    }
+
+    public function testLogin(){
         User::factory()->create([
             'name' => 'buyer',
             'user_name' => 'buyer',
@@ -32,18 +43,58 @@ class UserTest extends TestCase
         $response->assertOk();
     }
 
-    public function test_createUser()
-    {
-       $response = $this->postJson('/api/users',[
-        'name' => 'ahmed',
-        'user_name' => 'ahmed_h',
-        'role'=> 0,
-        'password' => Hash::make('123456789'),
-        'remember_token' => Str::random(10),
-       ]);
+    public function testLogout(){
 
+        $user = User::factory()->create();
+        Auth::login($user);
+        $response = $this->post('/api/logout');
+        $response->assertOk();
+        $response->assertJson([
+            'status' => 'Success',
+            'message' => 'Successfully logged out',
+            'data' => NULL,
+        ]);
+    }
+
+    public function testUnauthUserCanNotUpdateUser(){
+
+        $user = User::factory()->create();
+        $response = $this->patchJson('/api/users/' . $user->id, []);
+        $response->assertJson([
+            "message" => "Unauthenticated."
+        ]);
+    }
+
+    public function testUnauthUserCanNotDeleteUser(){
+        $user = User::factory()->create();
+        $response = $this->deleteJson('/api/users/' . $user->id);
+        $response->assertJson([
+            "message" => "Unauthenticated."
+        ]); 
+    }
+
+    public function testAuthUserCanUpdateUserData(){
+        $user = User::factory()->create();
+        Auth::login($user);
+        $response = $this->patchJson('/api/users/' . $user->id, [
+            'name' => 'Name',
+            'user_name' => 'userName',
+            'role'=> 0,
+            'password' => Hash::make('123456789'),
+        ]);
         $response->assertOk();
     }
+
+    public function testAuthUserCanDeleteUser(){
+        $user = User::factory()->create();
+        Auth::login($user);
+        $response = $this->deleteJson('/api/users/' . $user->id);
+        $response->assertStatus(200); 
+    }
+
+ 
+
+    
 
     
 }

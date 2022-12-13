@@ -25,8 +25,8 @@ class ProductUpdateRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
-            'amount_avilable'=>'required',
-            'cost'=>'required',
+            'amount_avilable'=>'required|numeric',
+            'cost'=>'required|numeric',
             'description'=>'nullable|string',
         ];
     }

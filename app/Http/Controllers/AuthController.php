@@ -27,12 +27,11 @@ class AuthController extends Controller
     public function logout()
     {
         try {
-
             Auth::logout();
             return  $this->successResponse(null, message: 'Successfully logged out');
         } catch (\Exception $e) {
-
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
     }
+    
 }

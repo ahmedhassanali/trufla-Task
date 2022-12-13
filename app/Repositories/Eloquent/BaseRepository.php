@@ -24,7 +24,7 @@ class BaseRepository implements EloquentRepositoryInterface
         return $this->model->find($id);
     }
 
-    public function create(array $attributes):Model
+    public function create(array $attributes): ?Model
     {
         return $this->model->create($attributes);
     }

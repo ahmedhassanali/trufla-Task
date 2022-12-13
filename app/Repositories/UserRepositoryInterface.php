@@ -5,7 +5,5 @@ use Illuminate\Database\Eloquent\Model;
 
 interface UserRepositoryInterface extends EloquentRepositoryInterface
 {
-
-    public function createUser(array $data):Model;
-
+    public function createUser(array $data): ?Model;
 }

@@ -28,20 +28,25 @@ class UserTest extends TestCase
 
     public function testLogin()
     {
-        User::factory()->create([
-            'name' => 'buyer',
-            'user_name' => 'buyer',
-            'role' => 0,
-            'password' => Hash::make('123456789'),
-            'remember_token' => Str::random(10),
-        ]);
-
+        $user = User::factory()->create();
         $response = $this->post('/api/login', [
-            'user_name' => 'buyer',
+            'user_name' => $user->user_name,
             'password' => '123456789',
         ]);
-
+        $this->assertAuthenticated();
         $response->assertOk();
+    }
+
+    public function testUserCanNotLoginteWithInvalidPassword()
+    {
+        $user = User::factory()->create();
+
+        $response = $this->post('/api/login', [
+            'user_name' => $user->user_name,
+            'password' => 'wrong-password',
+        ]);
+
+        $this->assertGuest();
     }
 
     public function testLogout()
@@ -60,7 +65,6 @@ class UserTest extends TestCase
 
     public function testUnauthUserCanNotUpdateUser()
     {
-
         $user = User::factory()->create();
         $response = $this->patchJson('/api/users/' . $user->id, []);
         $response->assertJson([

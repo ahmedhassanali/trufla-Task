@@ -39,11 +39,8 @@ class ProductController extends Controller
     public function update(ProductUpdateRequest $request, Product $product)
     {
         try {
-            if ($product['added_by'] == auth()->user()->id) {
-                $product = $this->productService->update($request->all(), $product->id);
+            $product = $this->productService->update($request->all(), $product->id);
                 return $this->successResponse($product, 'Product_Updated_successfully');
-            }
-            return $this->errorResponse('You don’t have permission to access this product', '403');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
@@ -62,12 +59,9 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         try {
-            if ($product['added_by'] == auth()->user()->id) {
                 $this->productService->delete($product->id);
                 return $this->successResponse("", 'Product_Deleted_successfully');
-            }
-            return $this->errorResponse('You don’t have permission to access this product', '403');
-        } catch (\Exception $e) {
+            } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
     }

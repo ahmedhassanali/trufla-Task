@@ -13,7 +13,8 @@ class AuthController extends Controller
 
     public function login(UserLoginRequest $request)
     {
-        $token = Auth::attempt($request->validated());
+        $cred = $request->only('user_name', 'password');
+        $token = Auth::attempt($cred);
 
         if (!$token)
             return $this->errorResponse('Unauthorized', 401);

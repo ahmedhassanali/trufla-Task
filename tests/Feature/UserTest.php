@@ -28,6 +28,7 @@ class UserTest extends TestCase
 
     public function testLogin()
     {
+        $this->withoutExceptionHandling();
         $user = User::factory()->create();
         $response = $this->post('/api/login', [
             'user_name' => $user->user_name,

@@ -33,11 +33,19 @@ class ProductService
 
     public function update(array $data, int $id)
     {
-        return $this->productRepositry->update($data, $id);
+        $product = $this->find($id);
+        if ($product['added_by'] == auth()->user()->id) 
+            return $this->productRepositry->update($data, $id);
+        else
+            throw new \Exception('You don’t have permission to access this product',403);
     }
 
     public function delete(int $id)
     {
-        return $this->productRepositry->delete($id);
+        $product = $this->find($id);
+        if ($product['added_by'] == auth()->user()->id)
+                return $this->productRepositry->delete($id);
+        else
+            throw new \Exception('You don’t have permission to access this product',403);
     }
 }

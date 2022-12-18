@@ -90,6 +90,7 @@ class ProductApiTest extends TestCase
     
     public function testAuthSellerUserCanNotUpdateOtherThanHisProducts()
     {
+        $this->withoutExceptionHandling();
         $sellerForAuth = User::factory()->create(['role' => 1]);
         $sellerForAddProduct = User::factory()->create(['role' => 1]);
         $product = Product::factory()->create(['added_by' => $sellerForAddProduct->id]);
